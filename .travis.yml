@@ -1,0 +1,24 @@
+language: python
+
+sudo: false
+
+python:
+  - '2.7'
+  - '3.4'
+  - '3.5'
+  - '3.6'
+
+install: pip install tox-travis
+
+script: tox
+
+deploy:
+  provider: pypi
+  user: rasterfoundry
+  password:
+    secure: BVRiQICIpRy8RCdOjB+bZ1CbSAf0JDeF70SeK+Ki0IvXmLfZBBwaZ2c+tG0r7ip/Y4JRzJQ2oE74EMspBFxRuGOHbxv1S2PB2KK7TSsbd/4XN1Zy8UNox4kjsEQvsIZiksq4ZOCR/kyehWJq1jwMnwqibgRwbzB63gh5LpDz5AFrO1FiH7FVZ3uUWDtelBGr5ovfOAE7OT3CA/m0+Yn2IRzWg1TVfqXW/a6ak4bWfo2zaG+3Vdj83LOyU/LY3zaK1p5nITooZfDQpOW3nFNHAlDWAR2wvH1CweAINfTKoVGYJWEaBII69NtfA5U7gc4v331yATPrsvqSI7NJAMz7fJBMSj7jPjUKVSAjJWs9ZIgxSN3If/jIIIYr2cd91ofz+iFxnv/b8/2RZ/1oV7rqeFkk66DqlZz0UhuvNVS9d1SnR8qeT97GKMFMaTXsMqT/RLU/U7a7ySCuvb9B+LuBJdP6oULdZSyJZRkWf84R6cX6tLJ8AFl4Lo5rjpjql73J7cxl/z2m7KiW9JY8kYv14zXLGrBINjNdk7uTTF++NjnR6w78AGCAuj8HSyJBl0UcOYmQmdRYq3CbxSrO2e2ZDJ8tUoTAynE0eEaAVUu+DYMuVv0CtcF2KHzO9ayUKWLKY2F7f2bRaYC9Fiu8DWR28buEEepo3qTfSKuBCe3xTtc=
+  on:
+    tags: true
+    distributions: sdist bdist_wheel
+    repo: azavea/raster-foundry-python-client
+    python: '3.6'
