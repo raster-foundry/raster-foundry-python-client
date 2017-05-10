@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+# Get rid of old install maybe
+if [ -d venv ]; then
+    rm -rf venv
+fi
+
+# Reset / grab a new one
+virtualenv venv
+source venv/bin/activate
+pip install jupyter notebook
+jupyter nbextension enable --py --sys-prefix widgetsnbextension
+
+pip install -r requirements.txt
+
+jupyter nbextension install --py --symlink --sys-prefix ipyleaflet
+jupyter nbextension enable --py --sys-prefix ipyleaflet
+
+python setup.py develop
