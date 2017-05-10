@@ -1,0 +1,2 @@
+# External dependencies
+-e git+https://github.com/azavea/ipyleaflet.git#egg=9cfd238
