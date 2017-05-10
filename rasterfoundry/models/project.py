@@ -1,10 +1,14 @@
 """A Project is a collection of zero or more scenes"""
-from ipyleaflet import (
-    Map,
-    SideBySideControl,
-    TileLayer,
-)
+from .. import NOTEBOOK_SUPPORT
 
+if NOTEBOOK_SUPPORT:
+    from ipyleaflet import (
+        Map,
+        SideBySideControl,
+        TileLayer,
+    )
+
+from ..decorators import check_notebook
 
 class Project(object):
     """A Raster Foundry project"""
@@ -28,6 +32,7 @@ class Project(object):
         self.name = project.name
         self.id = project.id
 
+    @check_notebook
     def get_map(self, **kwargs):
         """Return an ipyleaflet map centered on this project's center
 
@@ -45,6 +50,7 @@ class Project(object):
             **kwargs
         )
 
+    @check_notebook
     def add_to(self, leaflet_map):
         """Add this project to a leaflet map
 
@@ -54,6 +60,7 @@ class Project(object):
 
         leaflet_map.add_layer(self.get_layer())
 
+    @check_notebook
     def compare(self, other, leaflet_map):
         """Add a slider to compare two projects
 
@@ -83,6 +90,7 @@ class Project(object):
             center[0] = center[0] - 360
         return tuple(center)
 
+    @check_notebook
     def get_layer(self):
         """Returns a TileLayer for display using ipyleaflet"""
         return TileLayer(url=self.tms())
