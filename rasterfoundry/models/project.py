@@ -8,7 +8,8 @@ if NOTEBOOK_SUPPORT:
         TileLayer,
     )
 
-from ..decorators import check_notebook
+from ..decorators import check_notebook  # NOQA
+
 
 class Project(object):
     """A Raster Foundry project"""
@@ -80,9 +81,15 @@ class Project(object):
         """Get the center of this project's extent"""
         coords = self._project.extent.get('coordinates')
         if not coords:
-            raise ValueError('Project must have coordinates to calculate a center')
-        x_min = min(coord[0] + (360 if coord[0] < 0 else 0) for coord in coords[0])
-        x_max = max(coord[0] + (360 if coord[0] < 0 else 0) for coord in coords[0])
+            raise ValueError(
+                'Project must have coordinates to calculate a center'
+            )
+        x_min = min(
+            coord[0] + (360 if coord[0] < 0 else 0) for coord in coords[0]
+        )
+        x_max = max(
+            coord[0] + (360 if coord[0] < 0 else 0) for coord in coords[0]
+        )
         y_min = min(coord[1] for coord in coords[0])
         y_max = max(coord[1] for coord in coords[0])
         center = [(y_min + y_max) / 2., (x_min + x_max) / 2.]

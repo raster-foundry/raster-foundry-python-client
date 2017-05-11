@@ -13,7 +13,7 @@ source venv/bin/activate
 pip install jupyter notebook
 jupyter nbextension enable --py --sys-prefix widgetsnbextension
 
-pip install -r requirements.txt
+pip install -e git+https://github.com/azavea/ipyleaflet#egg=9cfd238
 
 jupyter nbextension install --py --symlink --sys-prefix ipyleaflet
 jupyter nbextension enable --py --sys-prefix ipyleaflet
