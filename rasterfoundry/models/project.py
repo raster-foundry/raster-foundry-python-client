@@ -1,5 +1,6 @@
 """A Project is a collection of zero or more scenes"""
 from .. import NOTEBOOK_SUPPORT
+from .map_token import MapToken
 
 if NOTEBOOK_SUPPORT:
     from ipyleaflet import (
@@ -77,6 +78,11 @@ class Project(object):
         )
         leaflet_map.add_control(control)
 
+    @check_notebook
+    def get_layer(self):
+        """Returns a TileLayer for display using ipyleaflet"""
+        return TileLayer(url=self.tms())
+
     def get_center(self):
         """Get the center of this project's extent"""
         coords = self._project.extent.get('coordinates')
@@ -97,10 +103,16 @@ class Project(object):
             center[0] = center[0] - 360
         return tuple(center)
 
-    @check_notebook
-    def get_layer(self):
-        """Returns a TileLayer for display using ipyleaflet"""
-        return TileLayer(url=self.tms())
+    def get_map_token(self):
+        """Returns the map token for this project
+
+        Returns:
+            str
+        """
+
+        resp = self.api.client.Imagery.get_map_tokens(projectId=self.id).result()
+        if resp.results:
+            return MapToken(resp.results[0], self.api)
 
     def tms(self):
         """Return a TMS URL for a project"""
