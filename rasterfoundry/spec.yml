@@ -984,6 +984,7 @@ paths:
       tags:
         - Imagery
       parameters:
+        - $ref: '#/parameters/page'
         - $ref: '#/parameters/projectId'
         - $ref: '#/parameters/organization'
         - $ref: '#/parameters/createdBy'

@@ -80,10 +80,17 @@ class API(object):
             List[MapToken]
         """
 
-        request = self.client.Imagery.get_map_tokens()
-        map_tokens = [
-            MapToken(map_token, self) for map_token in request.result().results
-        ]
+        has_next = True
+        projects = []
+        page = 0
+        map_tokens = []
+        while has_next:
+            paginated_map_tokens = self.client.Imagery.get_map_tokens(page=page).result()
+            map_tokens += [
+                MapToken(map_token, self) for map_token in paginated_map_tokens.results
+            ]
+            page = paginated_map_tokens.page + 1
+            has_next = paginated_map_tokens.hasNext
         return map_tokens
 
     @property
