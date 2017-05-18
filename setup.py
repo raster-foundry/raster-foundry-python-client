@@ -28,7 +28,7 @@ setuptools.setup(
     ],
     extras_require={
         'notebook': [
-            'notebook == 4.0.0'
+            'notebook >= 4.0.0'
         ],
         'dev': [],
         'test': [],
