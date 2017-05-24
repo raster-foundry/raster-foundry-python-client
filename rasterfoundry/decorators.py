@@ -5,7 +5,9 @@ from . import NOTEBOOK_SUPPORT
 
 def check_notebook(f):
     def no_op():
-        logging.warn('This function requires jupyter notebook and ipyleaflet')
+        logging.warning(
+            'This function requires jupyter notebook and ipyleaflet'
+        )
         return
 
     if not NOTEBOOK_SUPPORT:

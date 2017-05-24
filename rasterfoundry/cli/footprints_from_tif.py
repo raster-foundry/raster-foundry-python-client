@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import argparse
 import logging
 import subprocess
@@ -106,7 +108,9 @@ def extract_polygon(mask_tif_path):
 
     mask = np.ma.masked_equal(raster, 0)
     logger.info('Extracting shapes from footprint masks')
-    geoms = shapes(raster, mask=mask.astype('bool'), transform=src_affine, connectivity=4)
+    geoms = shapes(
+        raster, mask=mask.astype('bool'), transform=src_affine, connectivity=4
+    )
 
     footprint, value = geoms.next()
     assert value == 255, 'Geometry should be of value 255, got %r' % value
@@ -126,7 +130,8 @@ def extract_footprints(tif_path):
     Returns:
         tuple
     """
-    logger.info('Beginning process to extract footprint for image:%s', tif_path)
+    logger.info('Beginning process to extract footprint for image: %s',
+                tif_path)
     with get_tempdir() as temp_dir:
 
         _, resampled_tif_path = tempfile.mkstemp(suffix='.TIF', dir=temp_dir)
@@ -147,11 +152,16 @@ def extract_footprints(tif_path):
 
         subprocess.check_call(cmd)
 
-        tile_mask_tif_path, data_mask_tif_path = create_tif_mask(temp_dir, resampled_tif_path)
+        tile_mask_tif_path, data_mask_tif_path = create_tif_mask(
+            temp_dir, resampled_tif_path
+        )
         data_footprint = extract_polygon(data_mask_tif_path)
         tile_footprint = extract_polygon(tile_mask_tif_path)
 
-        return {'data_footprint': data_footprint, 'tile_footprint': tile_footprint}
+        return {
+            'data_footprint': data_footprint,
+            'tile_footprint': tile_footprint
+        }
 
 
 def main():
@@ -160,5 +170,6 @@ def main():
     args = parser.parse_args()
     return extract_footprints(args.tif_path)
 
+
 if __name__ == '__main__':
-    main()
+    print(main())
