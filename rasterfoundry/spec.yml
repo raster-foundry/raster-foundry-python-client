@@ -3113,7 +3113,6 @@ definitions:
   CombinedSceneQueryParams:
     type: object
     description: Combined query parameters for filtering scenes
-    discriminator: type
     properties:
       orgParams:
         $ref: '#/definitions/OrgParams'
