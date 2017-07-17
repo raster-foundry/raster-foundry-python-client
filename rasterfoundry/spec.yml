@@ -4,7 +4,7 @@ info:
   description: An application to find, view, and analyze geospatial data at any scale
   version: "0.1.0"
 
-host: localhost:9000
+host: app.rasterfoundry.com
 
 schemes:
   - http
