@@ -3,3 +3,5 @@ include LICENSE.txt
 include CHANGELOG.rst
 
 recursive-include tests *
+recursive-include examples *.ipynb
+recursive-include scripts *
