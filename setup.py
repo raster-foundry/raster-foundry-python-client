@@ -2,11 +2,11 @@ import setuptools
 
 setuptools.setup(
     name="rasterfoundry",
-    version="0.2.0",
+    version="0.2.1",
     description='A Python client for Raster Foundry, a web platform for '
     'combining, analyzing, and publishing raster data.',
     long_description=open('README.rst').read(),
-    url='https://github.com/azavea/raster-foundry-python-client',
+    url='https://github.com/raster-foundry/raster-foundry-python-client',
     author='Raster Foundry',
     author_email='info@rasterfoundry.com',
     license='Apache License 2.0',

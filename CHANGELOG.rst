@@ -1,3 +1,8 @@
+0.2.1
+-----
+
+- Correct repo references (#21)
+
 0.2.0
 -----
 
