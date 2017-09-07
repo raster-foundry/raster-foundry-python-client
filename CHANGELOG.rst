@@ -1,3 +1,9 @@
+0.4.0
+-----
+
+- Add *args and **kwargs to no_op function in notebook support check (#24)
+- Include Uploads example notebook (#23)
+
 0.3.0
 -----
 - Install cryptography 2.0+ (#22)
