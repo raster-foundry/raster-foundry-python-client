@@ -3,6 +3,7 @@ import requests
 
 from .. import NOTEBOOK_SUPPORT
 from ..decorators import check_notebook
+from ..exceptions import GatewayTimeoutException
 from .map_token import MapToken
 
 if NOTEBOOK_SUPPORT:
@@ -89,7 +90,7 @@ class Project(object):
         PNGs will be returned if the export_format is anything other than tiff
 
         Args:
-            bbox (str): GeoJSON format bounding box for the download
+            bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
             export_format (str): Requested download format
 
         Returns:
@@ -108,11 +109,18 @@ class Project(object):
             export_path=export_path
         )
 
-        return requests.get(
+        response = requests.get(
             request_path,
             params={'bbox': bbox, 'zoom': zoom, 'token': self.api.api_token},
             headers=headers
         )
+        if response.status_code == requests.codes.gateway_timeout:
+            raise GatewayTimeoutException(
+                'The export request timed out. '
+                'Try decreasing the zoom level or using a smaller bounding box.'
+            )
+        response.raise_for_status()
+        return response
 
     def geotiff(self, bbox, zoom=10):
         """Download this project as a geotiff
@@ -120,7 +128,7 @@ class Project(object):
         The returned string is the raw bytes of the associated geotiff.
 
         Args:
-            bbox (str): GeoJSON format bounding box for the download
+            bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
             zoom (int): zoom level for the export
 
         Returns:
@@ -135,7 +143,7 @@ class Project(object):
         The returned string is the raw bytes of the associated png.
 
         Args:
-            bbox (str): GeoJSON format bounding box for the download
+            bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
             zoom (int): zoom level for the export
 
         Returns

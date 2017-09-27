@@ -1,3 +1,9 @@
+0.4.1
+-----
+
+- Minor usability fixes (#26)
+- Fix ipyleaflet install (#25)
+
 0.4.0
 -----
 

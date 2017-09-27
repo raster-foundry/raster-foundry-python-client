@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="rasterfoundry",
-    version="0.4.0",
+    version="0.4.1",
     description='A Python client for Raster Foundry, a web platform for '
     'combining, analyzing, and publishing raster data.',
     long_description=open('README.rst').read(),
@@ -29,10 +29,11 @@ setuptools.setup(
     ],
     extras_require={
         'notebook': [
-            'notebook >= 4.0.0'
+            'notebook >= 4.0.0',
+            'az-ipyleaflet==0.4.1'
         ],
         'dev': [],
         'test': [],
     },
-    tests_require=[],
+    tests_require=[]
 )
