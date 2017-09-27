@@ -29,10 +29,11 @@ setuptools.setup(
     ],
     extras_require={
         'notebook': [
-            'notebook >= 4.0.0'
+            'notebook >= 4.0.0',
+            'az-ipyleaflet==0.4.1'
         ],
         'dev': [],
         'test': [],
     },
-    tests_require=[],
+    tests_require=[]
 )
