@@ -30,6 +30,42 @@ class Upload(object):
         self.files = upload.files
 
     @classmethod
+    def upload_create_from_planet(
+            cls, datasource, organization, planet_ids,
+            metadata={}, visibility='PRIVATE', project_id=None
+    ):
+        """
+        Args:
+            datasource (str): UUID of the datasource this upload belongs to
+            organization (str): UUID of the organization this upload belongs to
+            planet_ids (list[str]): list of IDs from Planet to import
+            metadata (dict): Additional information to store with this upload.
+                acquisitionDate and cloudCover will be parsed into any created
+                scenes.
+            visibility (str): PUBLIC, PRIVATE, or ORGANIZATION visibility level
+                for the created scenes
+            project_id (str): UUID of the project scenes from this upload
+                should be added to
+
+        Returns:
+            dict: splattable object to post to /uploads/
+        """
+        upload_status = 'UPLOADED'
+        file_type = 'GEOTIFF'
+
+        return dict(
+            uploadStatus=upload_status,
+            files=planet_ids,
+            uploadType='PLANET',
+            fileType=file_type,
+            datasource=datasource,
+            organizationId=organization,
+            metadata=metadata,
+            visibility=visibility,
+            projectId=project_id
+        )
+
+    @classmethod
     def upload_create_from_files(
             cls, datasource, organization, paths_to_tifs,
             dest_bucket, dest_prefix, metadata={}, visibility='PRIVATE',
