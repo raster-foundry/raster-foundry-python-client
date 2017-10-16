@@ -659,7 +659,7 @@ paths:
           schema:
             $ref: '#/definitions/Project'
       responses:
-        202:
+        201:
           description: Project details; at this point scene processes may be in-progress
           schema:
             $ref: '#/definitions/Project'
@@ -3075,6 +3075,7 @@ definitions:
             - DROPBOX
             - S3
             - LOCAL
+            - PLANET
         fileType:
           type: string
           description: type of data being uploaded, limited to two options right now
