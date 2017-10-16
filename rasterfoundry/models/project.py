@@ -88,7 +88,7 @@ class Project(object):
         Returns:
             Project: created object in Raster Foundry
         """
-        return api.client.Imagery.post_projects(project_create)
+        return api.client.Imagery.post_projects(project=project_create)
 
     def get_center(self):
         """Get the center of this project's extent"""
