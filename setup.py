@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="rasterfoundry",
-    version="0.4.1",
+    version="0.5.0",
     description='A Python client for Raster Foundry, a web platform for '
     'combining, analyzing, and publishing raster data.',
     long_description=open('README.rst').read(),
@@ -25,7 +25,8 @@ setuptools.setup(
         'pyasn1 >= 0.2.3',
         'requests >= 2.9.1',
         'bravado >= 8.4.0',
-        'boto3 >= 1.4.4'
+        'boto3 >= 1.4.4',
+        'future >= 0.16.0'
     ],
     extras_require={
         'notebook': [

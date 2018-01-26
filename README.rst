@@ -8,7 +8,7 @@ Usage
 
 .. code-block:: python
 
-   from rf.api import API
+   from rasterfoundry.api import API
    refresh_token = '<>'
 
    api = API(refresh_token=refresh_token)
@@ -45,6 +45,7 @@ Then, enable widgets and leaflet in in jupyter notebooks:
 
 .. code:: bash
 
+   $ jupyter nbextension install --py --symlink --sys-prefix widgetsnbextension
    $ jupyter nbextension enable --py --sys-prefix widgetsnbextension 
    $ jupyter nbextension install --py --symlink --sys-prefix ipyleaflet
    $ jupyter nbextension enable --py --sys-prefix ipyleaflet

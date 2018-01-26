@@ -1,10 +1,14 @@
 """A Project is a collection of zero or more scenes"""
 import requests
+import uuid
+import json
+import copy
 
 from .. import NOTEBOOK_SUPPORT
 from ..decorators import check_notebook
 from ..exceptions import GatewayTimeoutException
 from .map_token import MapToken
+from ..aws.s3 import download_to_string
 
 if NOTEBOOK_SUPPORT:
     from ipyleaflet import (
@@ -49,7 +53,7 @@ class Project(object):
         Returns:
             Project: created object in Raster Foundry
         """
-        return api.client.Imagery.post_projects(project_create)
+        return api.client.Imagery.post_projects(project=project_create)
 
     def get_center(self):
         """Get the center of this project's extent"""
@@ -84,7 +88,7 @@ class Project(object):
         if resp.results:
             return MapToken(resp.results[0], self.api)
 
-    def get_export(self, bbox, zoom=10, export_format='png'):
+    def get_export(self, bbox, zoom=10, export_format='png', raw=False):
         """Download this project as a file
 
         PNGs will be returned if the export_format is anything other than tiff
@@ -111,7 +115,12 @@ class Project(object):
 
         response = requests.get(
             request_path,
-            params={'bbox': bbox, 'zoom': zoom, 'token': self.api.api_token},
+            params={
+                'bbox': bbox,
+                'zoom': zoom,
+                'token': self.api.api_token,
+                'colorCorrect': 'false' if raw else 'true'
+            },
             headers=headers
         )
         if response.status_code == requests.codes.gateway_timeout:
@@ -122,7 +131,7 @@ class Project(object):
         response.raise_for_status()
         return response
 
-    def geotiff(self, bbox, zoom=10):
+    def geotiff(self, bbox, zoom=10, raw=False):
         """Download this project as a geotiff
 
         The returned string is the raw bytes of the associated geotiff.
@@ -135,9 +144,9 @@ class Project(object):
             str
         """
 
-        return self.get_export(bbox, zoom, 'tiff').content
+        return self.get_export(bbox, zoom, 'tiff', raw).content
 
-    def png(self, bbox, zoom=10):
+    def png(self, bbox, zoom=10, raw=False):
         """Download this project as a png
 
         The returned string is the raw bytes of the associated png.
@@ -150,7 +159,7 @@ class Project(object):
             str
         """
 
-        return self.get_export(bbox, zoom, 'png').content
+        return self.get_export(bbox, zoom, 'png', raw).content
 
     def tms(self):
         """Return a TMS URL for a project"""
@@ -160,6 +169,62 @@ class Project(object):
             scheme=self.api.scheme, host=self.api.tile_host,
             tile_path=tile_path, token=self.api.api_token
         )
+
+    def post_annotations(self, annotations_uri):
+        annotations = json.loads(download_to_string(annotations_uri))
+        # Convert annotations to RF format.
+        rf_annotations = copy.deepcopy(annotations)
+        for feature in rf_annotations['features']:
+            properties = feature['properties']
+            feature['properties'] = {
+                'label': properties['class_name'],
+                'description': '',
+                'machineGenerated': True,
+                'confidence': properties['score'],
+                'quality': 'YES'
+            }
+
+        self.api.client.Imagery.post_projects_uuid_annotations(
+            uuid=self.id, annotations=rf_annotations).future.result()
+
+    def get_image_source_uris(self):
+        """Return the sourceUris of images associated with this project"""
+        source_uris = []
+        scenes = self.api.client.Imagery.get_projects_uuid_scenes(uuid=self.id) \
+                     .result().results
+        for scene in scenes:
+            for image in scene.images:
+                source_uris.append(image.sourceUri)
+
+        return source_uris
+
+    def start_predict_job(self, rv_batch_client, inference_graph_uri,
+                          label_map_uri, predictions_uri,
+                          channel_order=[0, 1, 2]):
+        """Start a Batch job to perform object detection on this project.
+
+        Args:
+            rv_batch_client: instance of RasterVisionBatchClient used to start
+                Batch jobs
+            inference_graph_uri (str): file with exported object detection
+                model file
+            label_map_uri (str): file with mapping from class id to display name
+            predictions_uri (str): GeoJSON file output by the prediction job
+            channel_order (list of int)
+        Returns:
+            job_id (str): job_id of job started on Batch
+        """
+        source_uris = self.get_image_source_uris()
+        source_uris_str = ' '.join(source_uris)
+        channel_order = ' '.join([str(channel) for channel in channel_order])
+        # Add uuid to job_name because it has to be unique.
+        job_name = 'predict_project_{}_{}'.format(self.id, uuid.uuid1())
+        command = 'python -m rv.detection.run predict --channel-order {} {} {} {} {}'.format(  # noqa
+            channel_order, inference_graph_uri, label_map_uri, source_uris_str,
+            predictions_uri)
+        job_id = rv_batch_client.start_raster_vision_job(job_name, command)
+
+        return job_id
 
     @check_notebook
     def add_to(self, leaflet_map):
