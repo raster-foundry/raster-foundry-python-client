@@ -1,3 +1,11 @@
+0.5.0
+------
+
+- Add RV integration for creating project files and running predictions on prjects
+- Support analysis preview and raw export
+- Add option to allow for raw (non-color-corrected) exports
+- Updates to posting projects
+
 0.4.1
 -----
 
