@@ -181,7 +181,7 @@ class Project(object):
                 'description': '',
                 'machineGenerated': True,
                 'confidence': properties['score'],
-                'quality': 'YES'
+                'quality': 'MISS' # TODO change this to UNSURE after fixing RF
             }
 
         self.api.client.Imagery.post_projects_uuid_annotations(
