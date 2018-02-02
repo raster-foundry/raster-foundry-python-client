@@ -1127,6 +1127,8 @@ paths:
         - Imagery
       parameters:
         - $ref: '#/parameters/uuid'
+        - $ref: '#/parameters/pageSize'
+        - $ref: '#/parameters/page'
       responses:
         200:
           description: Order of scenes in project for mosaic purposes

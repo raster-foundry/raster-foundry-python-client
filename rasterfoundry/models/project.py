@@ -186,19 +186,32 @@ class Project(object):
         self.api.client.Imagery.post_projects_uuid_annotations(
             uuid=self.id, annotations=rf_annotations).future.result()
 
+    def get_scenes(self):
+        def get_page(page):
+            return self.api.client.Imagery.get_projects_uuid_scenes(
+                uuid=self.id, page=page).result()
+
+        return get_all_paginated(get_page)
+
+    def get_ordered_scene_ids(self):
+        def get_page(page):
+            return self.api.client.Imagery.get_projects_uuid_order(
+                uuid=self.id, page=page).result()
+
+        # Need to reverse so that order is from bottom-most to top-most layer.
+        return list(reversed(get_all_paginated(get_page)))
+
     def get_image_source_uris(self):
         """Return sourceUris of images for with this project sorted by z-index."""
         source_uris = []
-        scenes = self.api.client.Imagery.get_projects_uuid_scenes(uuid=self.id) \
-                     .result().results
-        scene_order = self.api.client.Imagery.get_projects_uuid_order(uuid=self.id) \
-                          .result().results
+
+        scenes = self.get_scenes()
+        ordered_scene_ids = self.get_ordered_scene_ids()
 
         id_to_scene = {}
         for scene in scenes:
             id_to_scene[scene.id] = scene
-        # Need to reverse so that order is from bottom-most to top-most layer.
-        sorted_scenes = [id_to_scene[scene_id] for scene_id in reversed(scene_order)]
+        sorted_scenes = [id_to_scene[scene_id] for scene_id in ordered_scene_ids]
 
         for scene in sorted_scenes:
             for image in scene.images:
