@@ -180,8 +180,7 @@ class Project(object):
                 'label': properties['class_name'],
                 'description': '',
                 'machineGenerated': True,
-                'confidence': properties['score'],
-                'quality': 'YES'
+                'confidence': properties['score']
             }
 
         self.api.client.Imagery.post_projects_uuid_annotations(
@@ -192,7 +191,15 @@ class Project(object):
         source_uris = []
         scenes = self.api.client.Imagery.get_projects_uuid_scenes(uuid=self.id) \
                      .result().results
+        scene_order = self.api.client.Imagery.get_projects_uuid_order(uuid=self.id) \
+                          .result().results
+
+        id_to_scene = {}
         for scene in scenes:
+            id_to_scene[scene.id] = scene
+        sorted_scenes = [id_to_scene[scene_id] for scene_id in scene_order]
+
+        for scene in sorted_scenes:
             for image in scene.images:
                 source_uris.append(image.sourceUri)
 
