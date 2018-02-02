@@ -90,3 +90,26 @@ def mkdir_p(path):
             pass
         else:
             raise
+
+
+def get_all_paginated(get_page_fn, list_field='results'):
+    """Get all objects from a paginated endpoint.
+
+    Args:
+        get_page_fn: function that takes a page number and returns results
+        list_field: field in the results that contains the list of objects
+
+    Returns:
+        List of all objects from a paginated endpoint
+    """
+    has_next = True
+    all_results = []
+    page = 0
+    while has_next:
+        paginated_results = get_page_fn(page)
+        has_next = paginated_results.hasNext
+        page = paginated_results.page + 1
+        for result in getattr(paginated_results, list_field):
+            all_results.append(result)
+
+    return all_results
