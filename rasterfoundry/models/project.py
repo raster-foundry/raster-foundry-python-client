@@ -187,7 +187,7 @@ class Project(object):
             uuid=self.id, annotations=rf_annotations).future.result()
 
     def get_image_source_uris(self):
-        """Return the sourceUris of images associated with this project"""
+        """Return sourceUris of images for with this project sorted by z-index."""
         source_uris = []
         scenes = self.api.client.Imagery.get_projects_uuid_scenes(uuid=self.id) \
                      .result().results
@@ -197,7 +197,8 @@ class Project(object):
         id_to_scene = {}
         for scene in scenes:
             id_to_scene[scene.id] = scene
-        sorted_scenes = [id_to_scene[scene_id] for scene_id in scene_order]
+        # Need to reverse so that order is from bottom-most to top-most layer.
+        sorted_scenes = [id_to_scene[scene_id] for scene_id in reversed(scene_order)]
 
         for scene in sorted_scenes:
             for image in scene.images:
