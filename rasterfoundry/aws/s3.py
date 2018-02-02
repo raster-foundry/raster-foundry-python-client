@@ -109,7 +109,7 @@ def download_to_string(uri):
             file_buffer = io.BytesIO()
             s3.download_fileobj(
                 parsed_uri.netloc, parsed_uri.path[1:], file_buffer)
-            return str(file_buffer.getvalue())
+            return file_buffer.getvalue().decode('utf-8')
         finally:
             file_buffer.close()
     else:
