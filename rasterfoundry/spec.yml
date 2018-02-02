@@ -1127,10 +1127,11 @@ paths:
         - Imagery
       parameters:
         - $ref: '#/parameters/uuid'
-      # TODO: fill in all possible responses
       responses:
         200:
           description: Order of scenes in project for mosaic purposes
+          schema:
+            $ref: '#/definitions/SceneOrder'
     put:
       summary: Set a z-index order for scenes within the specified project
       tags:
@@ -3844,10 +3845,10 @@ definitions:
           quality:
             type: string
             enum:
-              - YES
-              - NO
-              - MISS
-              - MATCH
+              - "YES"
+              - "NO"
+              - "MISS"
+              - "UNSURE"
           projectId:
             type: string
             format: uuid
@@ -3874,10 +3875,10 @@ definitions:
           quality:
             type: string
             enum:
-              - YES
-              - NO
-              - MISS
-              - MATCH
+              - "YES"
+              - "NO"
+              - "MISS"
+              - "UNSURE"
       geometry:
         $ref: "#/definitions/Geometry"
 
@@ -3903,10 +3904,10 @@ definitions:
           quality:
             type: string
             enum:
-              - YES
-              - NO
-              - MISS
-              - MATCH
+              - "YES"
+              - "NO"
+              - "MISS"
+              - "UNSURE"
       geometry:
         $ref: "#/definitions/Geometry"
 
@@ -4025,3 +4026,16 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ShapeFeatureCreate'
+
+  SceneOrder:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PaginatedResponse'
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              type: string
+              format: uuid
+              description: id of scene
