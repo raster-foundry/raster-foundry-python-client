@@ -1,5 +1,6 @@
 import os
 import json
+import uuid
 
 from bravado.requests_client import RequestsClient
 from bravado.client import SwaggerClient
@@ -8,7 +9,8 @@ from simplejson import JSONDecodeError
 
 from .models import Project, MapToken, Analysis
 from .exceptions import RefreshTokenException
-from .utils import mkdir_p
+from .aws.s3 import str_to_file
+from .settings import RV_TEMP_URI
 
 SPEC_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                          'spec.yml')
@@ -145,47 +147,59 @@ class API(object):
             kwargs['bbox'] = ','.join(str(x) for x in bbox)
         return self.client.Imagery.get_scenes(**kwargs).result()
 
-    def get_project_configs(self, project_ids, annotation_uris):
+    def get_project_config(self, project_ids, annotations_uris=None):
         """Get data needed to create project config file for prep_train_data
 
         The prep_train_data script requires a project config files which
         lists the images and annotation URIs associated with each project
-        that will be used to generate training data.
+        that will be used to generate training data. If the annotation_uris
+        are not specified, an annotation file for each project will be
+        generated and saved to S3.
 
         Args:
             project_ids: list of project ids to make training data from
-            annotation_uris: list of corresponding annotation URIs
+            annotations_uris: optional list of corresponding annotation URIs
 
         Returns:
             Object of form [{'images': [...], 'annotations':...}, ...]
         """
         project_configs = []
-        for project_id, annotation_uri in zip(project_ids, annotation_uris):
+        for project_ind, project_id in enumerate(project_ids):
             proj = Project(
                 self.client.Imagery.get_projects_uuid(uuid=project_id).result(),
                 self)
+
+            if annotations_uris is None:
+                annotations_uri = os.path.join(
+                    RV_TEMP_URI, 'annotations', '{}.json'.format(uuid.uuid4()))
+                proj.save_annotations_json(annotations_uri)
+            else:
+                annotations_uri = annotations_uris[project_ind]
+
             image_uris = proj.get_image_source_uris()
             project_configs.append({
                 'id': project_id,
                 'images': image_uris,
-                'annotations': annotation_uri
+                'annotations': annotations_uri
             })
 
         return project_configs
 
-    def write_project_configs(self, project_ids, annotation_uris, output_path):
-        """Write project config file to disk.
+    def save_project_config(self, project_ids, output_uri,
+                            annotations_uris=None):
+        """Save project config file.
 
         This file is needed by Raster Vision to prepare training data, make
         predictions, and evaluate predictions.
 
         Args:
             project_ids: list of project ids to make training data from
-            annotation_uris: list of corresponding annotation URIs
             output_path: where to write the project config file
+            annotations_uris: optional list of corresponding annotation URIs
         """
-        project_configs = self.get_project_configs(
-            project_ids, annotation_uris)
-        mkdir_p(os.path.dirname(output_path))
-        with open(output_path, 'w') as output_file:
-            json.dump(project_configs, output_file, sort_keys=True, indent=4)
+        project_config = self.get_project_config(
+            project_ids, annotations_uris)
+        project_config_str = json.dumps(
+            project_config, sort_keys=True, indent=4)
+
+        str_to_file(project_config_str, output_uri)
