@@ -2022,7 +2022,6 @@ parameters:
     description: Quality check on annotations
     in: query
     type: string
-    required: true
     enum:
       - PASS
       - FAIL
