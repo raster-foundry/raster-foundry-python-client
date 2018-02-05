@@ -1,10 +1,5 @@
 from future.standard_library import install_aliases  # noqa
 install_aliases()  # noqa
-from urllib.parse import urlparse
-from os.path import join
-import tempfile
-import uuid
-import json
 import os
 import errno
 
@@ -55,31 +50,6 @@ class RasterVisionBatchClient():
             })['jobId']
 
         return job_id
-
-
-def upload_raster_vision_config(config_dict, config_uri_root):
-    """Upload a config file to S3
-
-    Args:
-        config_dict: a dictionary to turn into a JSON file to upload
-        config_uri_root: the root of the URI to upload the config to
-
-    Returns:
-        remote URI of the config file generate using a UUID
-    """
-    with tempfile.NamedTemporaryFile('w') as config_file:
-        json.dump(config_dict, config_file)
-        config_uri = join(
-            config_uri_root, '{}.json'.format(uuid.uuid1()))
-        s3 = boto3.resource('s3')
-        parsed_uri = urlparse(config_uri)
-        # Rewind file to beginning so that full content will be loaded.
-        # Without this line 0 bytes are uploaded.
-        config_file.seek(0)
-        s3.meta.client.upload_file(
-            config_file.name, parsed_uri.netloc, parsed_uri.path[1:])
-
-        return config_uri
 
 
 def mkdir_p(path):

@@ -3,12 +3,14 @@ import requests
 import uuid
 import json
 import copy
+from datetime import date, datetime
 
 from .. import NOTEBOOK_SUPPORT
 from ..decorators import check_notebook
 from ..exceptions import GatewayTimeoutException
 from .map_token import MapToken
-from ..aws.s3 import download_to_string
+from ..aws.s3 import str_to_file, file_to_str
+from ..utils import get_all_paginated
 
 if NOTEBOOK_SUPPORT:
     from ipyleaflet import (
@@ -171,8 +173,8 @@ class Project(object):
         )
 
     def post_annotations(self, annotations_uri):
-        annotations = json.loads(download_to_string(annotations_uri))
-        # Convert annotations to RF format.
+        annotations = json.loads(file_to_str(annotations_uri))
+        # Convert RV annotations to RF format.
         rf_annotations = copy.deepcopy(annotations)
         for feature in rf_annotations['features']:
             properties = feature['properties']
@@ -185,6 +187,26 @@ class Project(object):
 
         self.api.client.Imagery.post_projects_uuid_annotations(
             uuid=self.id, annotations=rf_annotations).future.result()
+
+    def get_annotations(self):
+        def get_page(page):
+            return self.api.client.Imagery.get_projects_uuid_annotations(
+                uuid=self.id, page=page).result()
+
+        return get_all_paginated(get_page, list_field='features')
+
+    def save_annotations_json(self, output_uri):
+        features = self.get_annotations()
+        geojson = {'features': [feature._as_dict() for feature in features]}
+
+        def json_serial(obj):
+            """JSON serializer for objects not serializable by default json code."""
+            if isinstance(obj, (datetime, date)):
+                return obj.isoformat()
+            raise TypeError('Type {} not serializable'.format(str(type(obj))))
+
+        geojson_str = json.dumps(geojson, default=json_serial)
+        str_to_file(geojson_str, output_uri)
 
     def get_scenes(self):
         def get_page(page):
