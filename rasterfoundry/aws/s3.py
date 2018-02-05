@@ -3,9 +3,12 @@ install_aliases()  # noqa
 from urllib.parse import urlparse
 import json
 import io
+import os
 
 import boto3
 from botocore.exceptions import ClientError
+
+from ..utils import mkdir_p
 
 
 s3 = boto3.client('s3')
@@ -102,15 +105,26 @@ def unauthorize_bucket(bucket_name):
     return resp['ResponseMetadata']['HTTPStatusCode']
 
 
-def download_to_string(uri):
-    parsed_uri = urlparse(uri)
+def file_to_str(file_uri):
+    parsed_uri = urlparse(file_uri)
     if parsed_uri.scheme == 's3':
-        try:
-            file_buffer = io.BytesIO()
+        with io.BytesIO() as file_buffer:
             s3.download_fileobj(
                 parsed_uri.netloc, parsed_uri.path[1:], file_buffer)
             return file_buffer.getvalue().decode('utf-8')
-        finally:
-            file_buffer.close()
     else:
-        raise ValueError('uri needs to be for s3')
+        with open(file_uri, 'r') as file_buffer:
+            return file_buffer.read()
+
+
+def str_to_file(content_str, file_uri):
+    parsed_uri = urlparse(file_uri)
+    if parsed_uri.scheme == 's3':
+        bucket = parsed_uri.netloc
+        key = parsed_uri.path[1:]
+        with io.BytesIO(bytes(content_str, encoding='utf-8')) as str_buffer:
+            s3.upload_fileobj(str_buffer, bucket, key)
+    else:
+        mkdir_p(os.path.dirname(file_uri))
+        with open(file_uri, 'w') as content_file:
+            content_file.write(content_str)
