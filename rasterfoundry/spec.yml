@@ -2371,14 +2371,11 @@ parameters:
     type: string
     required: false
     enum:
-      - CREATED
+      - NOTEXPORTED
+      - TOBEEXPORTED
       - EXPORTING
       - EXPORTED
-      - QUEUED
-      - PROCESSING
-      - COMPLETE
       - FAILED
-      - ABORTED
   source:
     name: source
     description: Feed source URI
@@ -3642,23 +3639,15 @@ definitions:
         projectId:
           type: string
           format: uuid
-        sceneIds:
-          type: array
-          items:
-            type: string
-            format: uuid
         exportStatus:
           type: string
           description: Status of export
           enum:
-            - CREATED
+            - NOTEXPORTED
+            - TOBEEXPORTED
             - EXPORTING
             - EXPORTED
-            - QUEUED
-            - PROCESSING
-            - COMPLETE
             - FAILED
-            - ABORTED
         exportType:
           type: string
           description: Source of exports
@@ -3684,20 +3673,6 @@ definitions:
     - $ref: '#/definitions/BaseModel'
     - $ref: '#/definitions/UserTrackingMixin'
     - $ref: '#/definitions/ExportCreate'
-    - type: object
-      properties:
-        exportStatus:
-          type: string
-          description: Status of export
-          enum:
-            - CREATED
-            - EXPORTING
-            - EXPORTED
-            - QUEUED
-            - PROCESSING
-            - COMPLETE
-            - FAILED
-            - ABORTED
   ExportPaginated:
     allOf:
     - $ref: '#/definitions/PaginatedResponse'
@@ -3726,7 +3701,7 @@ definitions:
         type: integer
         description: epsg projection code
       mask:
-        type: object
+        type: string
         description: GeoJSON multipolygon
       stitch:
         type: boolean
