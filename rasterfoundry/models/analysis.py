@@ -1,6 +1,5 @@
 """An Analysis is a set of operations which take projects as inputs and output raster imagery"""
 import requests
-from shapely.geometry import box, mapping
 
 from .. import NOTEBOOK_SUPPORT
 from .export import Export
