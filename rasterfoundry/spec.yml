@@ -3701,7 +3701,7 @@ definitions:
         type: integer
         description: epsg projection code
       mask:
-        type: string
+        type: object
         description: GeoJSON multipolygon
       stitch:
         type: boolean
