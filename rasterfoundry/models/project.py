@@ -139,7 +139,7 @@ class Project(object):
             raw (bool): whether to do a raw export without color correction
 
         Returns:
-            str
+            HttpResponse or Export
         """
         if not async:
             return self._get_sync_export(bbox, zoom, export_format, raw)

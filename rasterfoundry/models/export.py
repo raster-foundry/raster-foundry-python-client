@@ -1,7 +1,12 @@
 """An Export is a job to get underlying geospatial data out of Raster Foundry"""
 
+import logging
+import time
 from shapely.geometry import mapping, box, MultiPolygon
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel('INFO')
 
 class Export(object):
     def __repr__(self):
@@ -20,6 +25,40 @@ class Export(object):
         self.name = export.id
         self.id = export.id
         self.api = api
+        self.exportStatus = export.exportStatus
+
+    @classmethod
+    def poll_export_status(cls,
+                           api,
+                           export_id,
+                           until=['COMPLETE', 'FAILED'],
+                           delay=15):
+        """Poll the status of an export until it is done
+
+        Note: if you don't include FAILED in the until parameter, polling will continue even
+        if the export has failed.
+
+        Args:
+            api (API): API to use for requests
+            export_id (str): UUID of the export to poll for
+            until ([str]): list of statuses to indicate completion
+            delay (int): how long to wait between attempts
+
+        Returns:
+            Export
+        """
+
+        if 'FAILED' not in until:
+            logger.warn(
+                'Not including FAILED in until can result in states in which this '
+                'function will never return. You may have left off FAILED by accident. '
+                'If that is the case, you should include FAILED in until and try again.'
+            )
+        export = api.client.Imagery.get_exports_uuid(uuid=export_id).result()
+        while export.exportStatus not in until:
+            time.sleep(delay)
+            export = api.client.Imagery.get_exports_uuid(uuid=export_id).result()
+        return Export(export, api)
 
     @classmethod
     def create_export(cls,
@@ -85,3 +124,11 @@ class Export(object):
         }
         export_create.update(update_dict)
         return api.client.Imagery.post_exports(Export=export_create).result()
+
+    def wait_for_completion(self):
+        """Wait until this export succeeds or fails, returning the completed export
+
+        Returns:
+            Export
+        """
+        return self.__class__.poll_export_status(self.api, self.id)
