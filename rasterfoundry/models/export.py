@@ -26,13 +26,14 @@ class Export(object):
         self.name = export.id
         self.id = export.id
         self.api = api
-        self.exportStatus = export.exportStatus
+        self.export_status = export.exportStatus
+        self.path = export.exportOptions.source
 
     @classmethod
     def poll_export_status(cls,
                            api,
                            export_id,
-                           until=['COMPLETE', 'FAILED'],
+                           until=['EXPORTED', 'FAILED'],
                            delay=15):
         """Poll the status of an export until it is done
 
@@ -70,7 +71,7 @@ class Export(object):
                       analysis=None,
                       visibility='PRIVATE',
                       source=None,
-                      export_type='LOCAL'):
+                      export_type='S3'):
         """Create an asynchronous export job for a project or analysis
 
         Only one of project_id or analysis_id should be specified
@@ -124,7 +125,10 @@ class Export(object):
             'organizationId': None
         }
         export_create.update(update_dict)
-        return api.client.Imagery.post_exports(Export=export_create).result()
+        return Export(
+            api.client.Imagery.post_exports(Export=export_create).result(),
+            api
+        )
 
     def wait_for_completion(self):
         """Wait until this export succeeds or fails, returning the completed export

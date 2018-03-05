@@ -92,7 +92,7 @@ class Project(object):
         if resp.results:
             return MapToken(resp.results[0], self.api)
 
-    def _get_sync_export(self, bbox, zoom, export_format, raw):
+    def get_thumbnail(self, bbox, zoom, export_format, raw):
         headers = self.api.http.session.headers.copy()
         headers['Accept'] = 'image/{}'.format(
             export_format
@@ -123,28 +123,17 @@ class Project(object):
         response.raise_for_status()
         return response
 
-    def _get_async_export(self, bbox, zoom):
-        return Export.create_export(self.api, bbox=bbox, zoom=zoom, project=self)
-
-    def get_export(self, bbox, zoom=10, async=False, export_format='png', raw=False):
-        """Download this project as a file
-
-        PNGs will be returned if the export_format is anything other than tiff
+    def create_export(self, bbox, zoom=10):
+        """Create an export job for this project
 
         Args:
             bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
             zoom (int): Zoom level for the download
-            async (bool): Whether to create an asynchronous export job
-            export_format (str): Requested download format
-            raw (bool): whether to do a raw export without color correction
 
         Returns:
-            HttpResponse or Export
+            Export
         """
-        if not async:
-            return self._get_sync_export(bbox, zoom, export_format, raw)
-        else:
-            return self._get_async_export(bbox, zoom)
+        return Export.create_export(self.api, bbox=bbox, zoom=zoom, project=self)
 
     def geotiff(self, bbox, zoom=10, raw=False):
         """Download this project as a geotiff
@@ -159,7 +148,7 @@ class Project(object):
             str
         """
 
-        return self.get_export(bbox, zoom, 'tiff', raw).content
+        return self.get_thumbnail(bbox, zoom, 'tiff', raw).content
 
     def png(self, bbox, zoom=10, raw=False):
         """Download this project as a png
@@ -174,7 +163,7 @@ class Project(object):
             str
         """
 
-        return self.get_export(bbox, zoom, 'png', raw).content
+        return self.get_thumbnail(bbox, zoom, 'png', raw).content
 
     def tms(self):
         """Return a TMS URL for a project"""

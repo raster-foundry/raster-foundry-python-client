@@ -1887,6 +1887,11 @@ paths:
           in: path
           type: string
           description: The filename of the file the user wishes to download. Filenames of an export need to first be fetched.
+        - name: token
+          required: true
+          in: query
+          type: string
+          description: API token
       responses:
         200:
           description: The content of the reqested file
@@ -3700,9 +3705,6 @@ definitions:
       crs:
         type: integer
         description: epsg projection code
-      mask:
-        type: object
-        description: GeoJSON multipolygon
       stitch:
         type: boolean
         description: stitch tiles into a single geotiff if possible
