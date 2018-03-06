@@ -98,3 +98,6 @@ ENV/
 /site
 /.idea/
 /raster-foundry-python-client.iml
+
+# MacOS
+.DS_Store

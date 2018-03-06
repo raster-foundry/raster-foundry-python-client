@@ -1896,7 +1896,8 @@ paths:
         200:
           description: The content of the reqested file
           schema:
-            type: file
+            type: string
+            format: binary
         404:
           description: |
             UUID does not reference an export that exists, the user has access to, and has finished successfully. The filename may not exist
