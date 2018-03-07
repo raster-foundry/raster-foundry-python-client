@@ -2,6 +2,8 @@
 
 import logging
 import time
+
+import requests
 from shapely.geometry import mapping, box, MultiPolygon
 
 logger = logging.getLogger(__name__)
@@ -59,7 +61,8 @@ class Export(object):
         export = api.client.Imagery.get_exports_uuid(uuid=export_id).result()
         while export.exportStatus not in until:
             time.sleep(delay)
-            export = api.client.Imagery.get_exports_uuid(uuid=export_id).result()
+            export = api.client.Imagery.get_exports_uuid(
+                uuid=export_id).result()
         return Export(export, api)
 
     @classmethod
@@ -119,7 +122,6 @@ class Export(object):
             'projectId': None,
             'exportStatus': 'TOBEEXPORTED',
             'exportType': export_type,
-            'source': source,
             'visibility': visibility,
             'toolRunId': None,
             'organizationId': None
@@ -127,8 +129,7 @@ class Export(object):
         export_create.update(update_dict)
         return Export(
             api.client.Imagery.post_exports(Export=export_create).result(),
-            api
-        )
+            api)
 
     def wait_for_completion(self):
         """Wait until this export succeeds or fails, returning the completed export
@@ -137,3 +138,14 @@ class Export(object):
             Export
         """
         return self.__class__.poll_export_status(self.api, self.id)
+
+    def download_file_bytes(self):
+        """Download the exported file from this export to memory
+        """
+        fnames = self.api.client.Imagery.get_exports_uuid_files(uuid=self.id).result()
+        fname = filter(lambda name: name.upper() != 'RFUploadAccessTestFile'.upper(), fnames)[0]
+        url = 'https://{app_host}/api/exports/{export_id}/files/{file_name}'.format(
+            app_host=self.api.app_host, export_id=self.id, file_name=fname)
+        resp = requests.get(url, params={'token': self.api.api_token})
+        resp.raise_for_status()
+        return resp.content

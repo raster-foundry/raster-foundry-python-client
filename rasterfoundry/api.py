@@ -36,6 +36,7 @@ class API(object):
 
         spec = load_file(SPEC_PATH)
 
+        self.app_host = host
         spec['host'] = host
         spec['schemes'] = [scheme]
 
