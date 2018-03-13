@@ -74,7 +74,8 @@ class Export(object):
                       analysis=None,
                       visibility='PRIVATE',
                       source=None,
-                      export_type='S3'):
+                      export_type='S3',
+                      raster_size=4000):
         """Create an asynchronous export job for a project or analysis
 
         Only one of project_id or analysis_id should be specified
@@ -87,10 +88,11 @@ class Export(object):
             analysis (Analysis): the analysis to export
             visibility (Visibility): what the export's visibility should be set to
             source (str): the destination for the exported files
-            exportType (str): one of 'S3', 'LOCAL', or 'DROPBOX'
+            export_type (str): one of 'S3', 'LOCAL', or 'DROPBOX'
+            raster_size (int): desired tiff size after export, 4000 by default - same as backend
 
         Returns:
-            ???
+            An export object
         """
 
         if project is not None and analysis is not None:
@@ -117,7 +119,8 @@ class Export(object):
         export_create = {
             'exportOptions': {
                 'mask': mapping(box_poly),
-                'resolution': zoom
+                'resolution': zoom,
+                'rasterSize': raster_size
             },
             'projectId': None,
             'exportStatus': 'TOBEEXPORTED',
@@ -141,6 +144,9 @@ class Export(object):
 
     def download_file_bytes(self):
         """Download the exported file from this export to memory
+
+        Returns:
+            a binary file
         """
         fnames = self.api.client.Imagery.get_exports_uuid_files(uuid=self.id).result()
         fname = filter(lambda name: name.upper() != 'RFUploadAccessTestFile'.upper(), fnames)[0]
