@@ -36,9 +36,14 @@ class Export(object):
     def files(self):
         try:
             fnames_res = self.api.client.Imagery.get_exports_uuid_files(uuid=self.id).result()
-            fnames = filter(lambda name: name.upper() != 'RFUploadAccessTestFile'.upper(), fnames_res)
-            return ['https://{app_host}/api/exports/{export_id}/files/{file_name}'.format(
-                app_host=self.api.app_host, export_id=self.id, file_name=fname) for fname in fnames]
+            fnames = filter(
+                lambda name: name.upper() != 'RFUploadAccessTestFile'.upper(),
+                fnames_res)
+            return [
+                'https://{app_host}/api/exports/{export_id}/files/{file_name}'.format(
+                    app_host=self.api.app_host,
+                    export_id=self.id,
+                    file_name=fname) for fname in fnames]
         except exception.HTTPNotFound:
             logger.info("The files can't be found until an export is completed")
 
