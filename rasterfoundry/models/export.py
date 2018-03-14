@@ -5,6 +5,7 @@ import time
 
 import requests
 from shapely.geometry import mapping, box, MultiPolygon
+from bravado import exception
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -30,6 +31,16 @@ class Export(object):
         self.api = api
         self.export_status = export.exportStatus
         self.path = export.exportOptions.source
+
+    @property
+    def files(self):
+        try:
+            fnames_res = self.api.client.Imagery.get_exports_uuid_files(uuid=self.id).result()
+            fnames = filter(lambda name: name.upper() != 'RFUploadAccessTestFile'.upper(), fnames_res)
+            return ['https://{app_host}/api/exports/{export_id}/files/{file_name}'.format(
+                app_host=self.api.app_host, export_id=self.id, file_name=fname) for fname in fnames]
+        except exception.HTTPNotFound:
+            logger.info("The files can't be found until an export is completed")
 
     @classmethod
     def poll_export_status(cls,
@@ -142,16 +153,15 @@ class Export(object):
         """
         return self.__class__.poll_export_status(self.api, self.id)
 
-    def download_file_bytes(self):
+    def download_file_bytes(self, index=0):
         """Download the exported file from this export to memory
+
+        Args:
+            index (int): which of this export's files to download
 
         Returns:
             a binary file
         """
-        fnames = self.api.client.Imagery.get_exports_uuid_files(uuid=self.id).result()
-        fname = filter(lambda name: name.upper() != 'RFUploadAccessTestFile'.upper(), fnames)[0]
-        url = 'https://{app_host}/api/exports/{export_id}/files/{file_name}'.format(
-            app_host=self.api.app_host, export_id=self.id, file_name=fname)
-        resp = requests.get(url, params={'token': self.api.api_token})
+        resp = requests.get(self.files[index], params={'token': self.api.api_token})
         resp.raise_for_status()
         return resp.content
