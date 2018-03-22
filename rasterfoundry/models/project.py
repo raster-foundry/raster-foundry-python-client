@@ -123,17 +123,19 @@ class Project(object):
         response.raise_for_status()
         return response
 
-    def create_export(self, bbox, zoom=10):
+    def create_export(self, bbox, zoom=10, raster_size=4000):
         """Create an export job for this project
 
         Args:
             bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
             zoom (int): Zoom level for the download
+            raster_size (int): desired tiff size after export, 4000 by default - same as backend
 
         Returns:
             Export
         """
-        return Export.create_export(self.api, bbox=bbox, zoom=zoom, project=self)
+        return Export.create_export(
+            self.api, bbox=bbox, zoom=zoom, project=self, raster_size=raster_size)
 
     def geotiff(self, bbox, zoom=10, raw=False):
         """Download this project as a geotiff
