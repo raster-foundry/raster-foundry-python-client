@@ -2,6 +2,7 @@
 import requests
 
 from .. import NOTEBOOK_SUPPORT
+from .export import Export
 from .project import Project
 from ..decorators import check_notebook
 from ..exceptions import GatewayTimeoutException
@@ -36,16 +37,7 @@ class Analysis(object):
         self.name = analysis.name
         self.id = analysis.id
 
-    def get_export(self, bbox, zoom=10):
-        """Download this Analysis as a single band tiff
-
-        Args:
-            bbox (str): Bounding box(formatted as 'x1,y1,x2,y2') for the download
-            zoom (number): Zoom level for the download
-
-        Returns:
-            str
-        """
+    def get_thumbnail(self, bbox, zoom, raw=False):
         export_path = self.EXPORT_TEMPLATE.format(analysis=self.id)
         request_path = '{scheme}://{host}{export_path}'.format(
             scheme=self.api.scheme, host=self.api.tile_host, export_path=export_path
@@ -57,6 +49,7 @@ class Analysis(object):
                 'bbox': bbox,
                 'zoom': zoom,
                 'token': self.api.api_token,
+                'colorCorrect': 'false' if raw else 'true'
             }
         )
         if response.status_code == requests.codes.gateway_timeout:
@@ -66,6 +59,19 @@ class Analysis(object):
             )
         response.raise_for_status()
         return response
+
+    def create_export(self, bbox, zoom=10, **exportOpts):
+        """Download this Analysis as a single band tiff
+
+        Args:
+            bbox (str): Bounding box(formatted as 'x1,y1,x2,y2') for the download
+            zoom (int): Zoom level for the download
+            exportOpts (dict): Additional parameters to pass to an async export job
+
+        Returns:
+            Export
+        """
+        return Export.create_export(self.api, bbox=bbox, zoom=zoom, analysis=self, **exportOpts)
 
     def tms(self, node=None):
         """Returns a TMS URL for this project

@@ -1,15 +1,17 @@
 """A Project is a collection of zero or more scenes"""
-import requests
-import uuid
-import json
 import copy
+import json
+import uuid
 from datetime import date, datetime
 
+import requests
+
+from .export import Export
+from .map_token import MapToken
 from .. import NOTEBOOK_SUPPORT
+from ..aws.s3 import file_to_str, str_to_file
 from ..decorators import check_notebook
 from ..exceptions import GatewayTimeoutException
-from .map_token import MapToken
-from ..aws.s3 import str_to_file, file_to_str
 from ..utils import get_all_paginated
 
 if NOTEBOOK_SUPPORT:
@@ -90,19 +92,7 @@ class Project(object):
         if resp.results:
             return MapToken(resp.results[0], self.api)
 
-    def get_export(self, bbox, zoom=10, export_format='png', raw=False):
-        """Download this project as a file
-
-        PNGs will be returned if the export_format is anything other than tiff
-
-        Args:
-            bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
-            export_format (str): Requested download format
-
-        Returns:
-            str
-        """
-
+    def get_thumbnail(self, bbox, zoom, export_format, raw):
         headers = self.api.http.session.headers.copy()
         headers['Accept'] = 'image/{}'.format(
             export_format
@@ -133,6 +123,20 @@ class Project(object):
         response.raise_for_status()
         return response
 
+    def create_export(self, bbox, zoom=10, raster_size=4000):
+        """Create an export job for this project
+
+        Args:
+            bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
+            zoom (int): Zoom level for the download
+            raster_size (int): desired tiff size after export, 4000 by default - same as backend
+
+        Returns:
+            Export
+        """
+        return Export.create_export(
+            self.api, bbox=bbox, zoom=zoom, project=self, raster_size=raster_size)
+
     def geotiff(self, bbox, zoom=10, raw=False):
         """Download this project as a geotiff
 
@@ -146,7 +150,7 @@ class Project(object):
             str
         """
 
-        return self.get_export(bbox, zoom, 'tiff', raw).content
+        return self.get_thumbnail(bbox, zoom, 'tiff', raw).content
 
     def png(self, bbox, zoom=10, raw=False):
         """Download this project as a png
@@ -161,7 +165,7 @@ class Project(object):
             str
         """
 
-        return self.get_export(bbox, zoom, 'png', raw).content
+        return self.get_thumbnail(bbox, zoom, 'png', raw).content
 
     def tms(self):
         """Return a TMS URL for a project"""

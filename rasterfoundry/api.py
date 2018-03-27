@@ -7,9 +7,10 @@ from bravado.requests_client import RequestsClient
 from bravado.swagger_model import load_file, load_url
 from simplejson import JSONDecodeError
 
+
 from .aws.s3 import str_to_file
 from .exceptions import RefreshTokenException
-from .models import Analysis, MapToken, Project
+from .models import Analysis, MapToken, Project, Export
 from .settings import RV_TEMP_URI
 
 try:
@@ -47,6 +48,7 @@ class API(object):
         else:
             spec = load_file(SPEC_PATH)
 
+        self.app_host = host
         spec['host'] = host
         spec['schemes'] = [scheme]
 
@@ -146,6 +148,24 @@ class API(object):
             for analysis in paginated_analyses.results:
                 analyses.append(Analysis(analysis, self))
         return analyses
+
+    @property
+    def exports(self):
+        """List exports a user has access to
+
+        Returns:
+            List[Export]
+        """
+        has_next = True
+        page = 0
+        exports = []
+        while has_next:
+            paginated_exports = self.client.Imagery.get_exports(page=page).result()
+            has_next = paginated_exports.hasNext
+            page = paginated_exports.page + 1
+            for export in paginated_exports.results:
+                exports.append(Export(export, self))
+        return exports
 
     def get_datasources(self, **kwargs):
         return self.client.Datasources.get_datasources(**kwargs).result()

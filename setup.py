@@ -26,7 +26,8 @@ setuptools.setup(
         'requests >= 2.9.1',
         'bravado >= 8.4.0',
         'boto3 >= 1.4.4',
-        'future >= 0.16.0'
+        'future >= 0.16.0',
+        'shapely >= 1.6.4post1'
     ],
     extras_require={
         'notebook': [
