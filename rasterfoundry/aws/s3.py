@@ -122,7 +122,7 @@ def str_to_file(content_str, file_uri):
     if parsed_uri.scheme == 's3':
         bucket = parsed_uri.netloc
         key = parsed_uri.path[1:]
-        with io.BytesIO(bytes(content_str, encoding='utf-8')) as str_buffer:
+        with io.BytesIO(bytes(content_str)) as str_buffer:
             s3.upload_fileobj(str_buffer, bucket, key)
     else:
         mkdir_p(os.path.dirname(file_uri))

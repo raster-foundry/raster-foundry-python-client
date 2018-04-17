@@ -178,21 +178,18 @@ class API(object):
             kwargs['bbox'] = ','.join(str(x) for x in bbox)
         return self.client.Imagery.get_scenes(**kwargs).result()
 
-    def get_project_config(self, project_ids, annotations_uris=None):
-        """Get data needed to create project config file for prep_train_data
+    def get_rv_project_configs(self, project_ids):
+        """Get Raster Vision project configs.
 
-        The prep_train_data script requires a project config files which
-        lists the images and annotation URIs associated with each project
-        that will be used to generate training data. If the annotation_uris
-        are not specified, an annotation file for each project will be
-        generated and saved to S3.
+        Saves the annotations for each project to S3 and generates an RV
+        config for each project pointing to the associated imagery and
+        annotations file.
 
         Args:
             project_ids: list of project ids to make training data from
-            annotations_uris: optional list of corresponding annotation URIs
 
         Returns:
-            Object of form [{'images': [...], 'annotations':...}, ...]
+            JSON formatted rastervision.protos.Project protobuf
         """
         project_configs = []
         for project_ind, project_id in enumerate(project_ids):
@@ -200,37 +197,33 @@ class API(object):
                 self.client.Imagery.get_projects_uuid(uuid=project_id).result(),
                 self)
 
-            if annotations_uris is None:
-                annotations_uri = os.path.join(
-                    RV_TEMP_URI, 'annotations', '{}.json'.format(uuid.uuid4()))
-                proj.save_annotations_json(annotations_uri)
-            else:
-                annotations_uri = annotations_uris[project_ind]
+            annotations_uri = os.path.join(
+                RV_TEMP_URI, 'annotations', '{}.json'.format(uuid.uuid4()))
+            proj.save_annotations_json(annotations_uri)
 
             image_uris = proj.get_image_source_uris()
-            project_configs.append({
-                'id': project_id,
-                'images': image_uris,
-                'annotations': annotations_uri
-            })
+
+            project_config = {
+                'raster_source': {
+                    'geotiff_files': {
+                        'uris': image_uris
+                    }
+                },
+                'ground_truth_label_store': {
+                    'classification_geojson_file': {
+                        'uri': annotations_uri,
+                        'options': {
+                            'ioa_thresh': 0.5,
+                            'use_intersection_over_cell': False,
+                            'pick_min_class_id': True,
+                            'background_class_id': 2,
+                            'cell_size': 300,
+                            'infer_cells': True
+                        }
+                    }
+                }
+            }
+
+            project_configs.append(project_config)
 
         return project_configs
-
-    def save_project_config(self, project_ids, output_uri,
-                            annotations_uris=None):
-        """Save project config file.
-
-        This file is needed by Raster Vision to prepare training data, make
-        predictions, and evaluate predictions.
-
-        Args:
-            project_ids: list of project ids to make training data from
-            output_path: where to write the project config file
-            annotations_uris: optional list of corresponding annotation URIs
-        """
-        project_config = self.get_project_config(
-            project_ids, annotations_uris)
-        project_config_str = json.dumps(
-            project_config, sort_keys=True, indent=4)
-
-        str_to_file(project_config_str, output_uri)
