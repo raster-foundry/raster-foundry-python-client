@@ -1127,10 +1127,13 @@ paths:
         - Imagery
       parameters:
         - $ref: '#/parameters/uuid'
-      # TODO: fill in all possible responses
+        - $ref: '#/parameters/pageSize'
+        - $ref: '#/parameters/page'
       responses:
         200:
           description: Order of scenes in project for mosaic purposes
+          schema:
+            $ref: '#/definitions/SceneOrder'
     put:
       summary: Set a z-index order for scenes within the specified project
       tags:
@@ -1884,11 +1887,17 @@ paths:
           in: path
           type: string
           description: The filename of the file the user wishes to download. Filenames of an export need to first be fetched.
+        - name: token
+          required: true
+          in: query
+          type: string
+          description: API token
       responses:
         200:
           description: The content of the reqested file
           schema:
-            type: file
+            type: string
+            format: binary
         404:
           description: |
             UUID does not reference an export that exists, the user has access to, and has finished successfully. The filename may not exist
@@ -2019,7 +2028,6 @@ parameters:
     description: Quality check on annotations
     in: query
     type: string
-    required: true
     enum:
       - PASS
       - FAIL
@@ -2369,14 +2377,11 @@ parameters:
     type: string
     required: false
     enum:
-      - CREATED
+      - NOTEXPORTED
+      - TOBEEXPORTED
       - EXPORTING
       - EXPORTED
-      - QUEUED
-      - PROCESSING
-      - COMPLETE
       - FAILED
-      - ABORTED
   source:
     name: source
     description: Feed source URI
@@ -3640,23 +3645,15 @@ definitions:
         projectId:
           type: string
           format: uuid
-        sceneIds:
-          type: array
-          items:
-            type: string
-            format: uuid
         exportStatus:
           type: string
           description: Status of export
           enum:
-            - CREATED
+            - NOTEXPORTED
+            - TOBEEXPORTED
             - EXPORTING
             - EXPORTED
-            - QUEUED
-            - PROCESSING
-            - COMPLETE
             - FAILED
-            - ABORTED
         exportType:
           type: string
           description: Source of exports
@@ -3682,20 +3679,6 @@ definitions:
     - $ref: '#/definitions/BaseModel'
     - $ref: '#/definitions/UserTrackingMixin'
     - $ref: '#/definitions/ExportCreate'
-    - type: object
-      properties:
-        exportStatus:
-          type: string
-          description: Status of export
-          enum:
-            - CREATED
-            - EXPORTING
-            - EXPORTED
-            - QUEUED
-            - PROCESSING
-            - COMPLETE
-            - FAILED
-            - ABORTED
   ExportPaginated:
     allOf:
     - $ref: '#/definitions/PaginatedResponse'
@@ -3723,9 +3706,6 @@ definitions:
       crs:
         type: integer
         description: epsg projection code
-      mask:
-        type: object
-        description: GeoJSON multipolygon
       stitch:
         type: boolean
         description: stitch tiles into a single geotiff if possible
@@ -3844,10 +3824,10 @@ definitions:
           quality:
             type: string
             enum:
-              - YES
-              - NO
-              - MISS
-              - MATCH
+              - "YES"
+              - "NO"
+              - "MISS"
+              - "UNSURE"
           projectId:
             type: string
             format: uuid
@@ -3874,10 +3854,10 @@ definitions:
           quality:
             type: string
             enum:
-              - YES
-              - NO
-              - MISS
-              - MATCH
+              - "YES"
+              - "NO"
+              - "MISS"
+              - "UNSURE"
       geometry:
         $ref: "#/definitions/Geometry"
 
@@ -3903,10 +3883,10 @@ definitions:
           quality:
             type: string
             enum:
-              - YES
-              - NO
-              - MISS
-              - MATCH
+              - "YES"
+              - "NO"
+              - "MISS"
+              - "UNSURE"
       geometry:
         $ref: "#/definitions/Geometry"
 
@@ -4025,3 +4005,16 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ShapeFeatureCreate'
+
+  SceneOrder:
+    type: object
+    allOf:
+      - $ref: '#/definitions/PaginatedResponse'
+      - type: object
+        properties:
+          results:
+            type: array
+            items:
+              type: string
+              format: uuid
+              description: id of scene

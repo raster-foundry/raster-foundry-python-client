@@ -1,14 +1,18 @@
 """A Project is a collection of zero or more scenes"""
-import requests
-import uuid
-import json
 import copy
+import json
+import uuid
+from datetime import date, datetime
 
+import requests
+
+from .export import Export
+from .map_token import MapToken
 from .. import NOTEBOOK_SUPPORT
+from ..aws.s3 import file_to_str, str_to_file
 from ..decorators import check_notebook
 from ..exceptions import GatewayTimeoutException
-from .map_token import MapToken
-from ..aws.s3 import download_to_string
+from ..utils import get_all_paginated
 
 if NOTEBOOK_SUPPORT:
     from ipyleaflet import (
@@ -88,19 +92,7 @@ class Project(object):
         if resp.results:
             return MapToken(resp.results[0], self.api)
 
-    def get_export(self, bbox, zoom=10, export_format='png', raw=False):
-        """Download this project as a file
-
-        PNGs will be returned if the export_format is anything other than tiff
-
-        Args:
-            bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
-            export_format (str): Requested download format
-
-        Returns:
-            str
-        """
-
+    def get_thumbnail(self, bbox, zoom, export_format, raw):
         headers = self.api.http.session.headers.copy()
         headers['Accept'] = 'image/{}'.format(
             export_format
@@ -131,6 +123,20 @@ class Project(object):
         response.raise_for_status()
         return response
 
+    def create_export(self, bbox, zoom=10, raster_size=4000):
+        """Create an export job for this project
+
+        Args:
+            bbox (str): Bounding box (formatted as 'x1,y1,x2,y2') for the download
+            zoom (int): Zoom level for the download
+            raster_size (int): desired tiff size after export, 4000 by default - same as backend
+
+        Returns:
+            Export
+        """
+        return Export.create_export(
+            self.api, bbox=bbox, zoom=zoom, project=self, raster_size=raster_size)
+
     def geotiff(self, bbox, zoom=10, raw=False):
         """Download this project as a geotiff
 
@@ -144,7 +150,7 @@ class Project(object):
             str
         """
 
-        return self.get_export(bbox, zoom, 'tiff', raw).content
+        return self.get_thumbnail(bbox, zoom, 'tiff', raw).content
 
     def png(self, bbox, zoom=10, raw=False):
         """Download this project as a png
@@ -159,7 +165,7 @@ class Project(object):
             str
         """
 
-        return self.get_export(bbox, zoom, 'png', raw).content
+        return self.get_thumbnail(bbox, zoom, 'png', raw).content
 
     def tms(self):
         """Return a TMS URL for a project"""
@@ -171,8 +177,8 @@ class Project(object):
         )
 
     def post_annotations(self, annotations_uri):
-        annotations = json.loads(download_to_string(annotations_uri))
-        # Convert annotations to RF format.
+        annotations = json.loads(file_to_str(annotations_uri))
+        # Convert RV annotations to RF format.
         rf_annotations = copy.deepcopy(annotations)
         for feature in rf_annotations['features']:
             properties = feature['properties']
@@ -180,19 +186,60 @@ class Project(object):
                 'label': properties['class_name'],
                 'description': '',
                 'machineGenerated': True,
-                'confidence': properties['score'],
-                'quality': 'YES'
+                'confidence': properties['score']
             }
 
         self.api.client.Imagery.post_projects_uuid_annotations(
             uuid=self.id, annotations=rf_annotations).future.result()
 
+    def get_annotations(self):
+        def get_page(page):
+            return self.api.client.Imagery.get_projects_uuid_annotations(
+                uuid=self.id, page=page).result()
+
+        return get_all_paginated(get_page, list_field='features')
+
+    def save_annotations_json(self, output_uri):
+        features = self.get_annotations()
+        geojson = {'features': [feature._as_dict() for feature in features]}
+
+        def json_serial(obj):
+            """JSON serializer for objects not serializable by default json code."""
+            if isinstance(obj, (datetime, date)):
+                return obj.isoformat()
+            raise TypeError('Type {} not serializable'.format(str(type(obj))))
+
+        geojson_str = json.dumps(geojson, default=json_serial)
+        str_to_file(geojson_str, output_uri)
+
+    def get_scenes(self):
+        def get_page(page):
+            return self.api.client.Imagery.get_projects_uuid_scenes(
+                uuid=self.id, page=page).result()
+
+        return get_all_paginated(get_page)
+
+    def get_ordered_scene_ids(self):
+        def get_page(page):
+            return self.api.client.Imagery.get_projects_uuid_order(
+                uuid=self.id, page=page).result()
+
+        # Need to reverse so that order is from bottom-most to top-most layer.
+        return list(reversed(get_all_paginated(get_page)))
+
     def get_image_source_uris(self):
-        """Return the sourceUris of images associated with this project"""
+        """Return sourceUris of images for with this project sorted by z-index."""
         source_uris = []
-        scenes = self.api.client.Imagery.get_projects_uuid_scenes(uuid=self.id) \
-                     .result().results
+
+        scenes = self.get_scenes()
+        ordered_scene_ids = self.get_ordered_scene_ids()
+
+        id_to_scene = {}
         for scene in scenes:
+            id_to_scene[scene.id] = scene
+        sorted_scenes = [id_to_scene[scene_id] for scene_id in ordered_scene_ids]
+
+        for scene in sorted_scenes:
             for image in scene.images:
                 source_uris.append(image.sourceUri)
 

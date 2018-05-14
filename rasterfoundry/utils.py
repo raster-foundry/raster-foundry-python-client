@@ -1,10 +1,5 @@
 from future.standard_library import install_aliases  # noqa
 install_aliases()  # noqa
-from urllib.parse import urlparse
-from os.path import join
-import tempfile
-import uuid
-import json
 import os
 import errno
 
@@ -57,31 +52,6 @@ class RasterVisionBatchClient():
         return job_id
 
 
-def upload_raster_vision_config(config_dict, config_uri_root):
-    """Upload a config file to S3
-
-    Args:
-        config_dict: a dictionary to turn into a JSON file to upload
-        config_uri_root: the root of the URI to upload the config to
-
-    Returns:
-        remote URI of the config file generate using a UUID
-    """
-    with tempfile.NamedTemporaryFile('w') as config_file:
-        json.dump(config_dict, config_file)
-        config_uri = join(
-            config_uri_root, '{}.json'.format(uuid.uuid1()))
-        s3 = boto3.resource('s3')
-        parsed_uri = urlparse(config_uri)
-        # Rewind file to beginning so that full content will be loaded.
-        # Without this line 0 bytes are uploaded.
-        config_file.seek(0)
-        s3.meta.client.upload_file(
-            config_file.name, parsed_uri.netloc, parsed_uri.path[1:])
-
-        return config_uri
-
-
 def mkdir_p(path):
     try:
         os.makedirs(path)
@@ -90,3 +60,26 @@ def mkdir_p(path):
             pass
         else:
             raise
+
+
+def get_all_paginated(get_page_fn, list_field='results'):
+    """Get all objects from a paginated endpoint.
+
+    Args:
+        get_page_fn: function that takes a page number and returns results
+        list_field: field in the results that contains the list of objects
+
+    Returns:
+        List of all objects from a paginated endpoint
+    """
+    has_next = True
+    all_results = []
+    page = 0
+    while has_next:
+        paginated_results = get_page_fn(page)
+        has_next = paginated_results.hasNext
+        page = paginated_results.page + 1
+        for result in getattr(paginated_results, list_field):
+            all_results.append(result)
+
+    return all_results
