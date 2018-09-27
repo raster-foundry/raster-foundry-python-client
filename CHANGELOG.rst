@@ -1,6 +1,21 @@
 Change Log
 ==========
 
+`0.7.0 <https://github.com/raster-foundry/raster-foundry-python-client/tree/0.7.0>`__ (2018-09-27)
+--------------------------------------------------------------------------------------------------
+
+`Full
+Changelog <https://github.com/raster-foundry/raster-foundry-python-client/compare/0.6.0...0.7.0>`__
+
+**Merged pull requests:**
+
+-  Add convenience functions and example notebook for datasource CRUD
+   `#67 <https://github.com/raster-foundry/raster-foundry-python-client/pull/67>`__
+-  Point to permanent location by default for spec
+   `#59 <https://github.com/raster-foundry/raster-foundry-python-client/pull/59>`__
+
+.. _section-1:
+
 `0.6.0 <https://github.com/raster-foundry/raster-foundry-python-client/tree/0.6.0>`__ (2018-05-14)
 --------------------------------------------------------------------------------------------------
 
@@ -15,6 +30,8 @@ Changelog <https://github.com/raster-foundry/raster-foundry-python-client/compar
    `#49 <https://github.com/raster-foundry/raster-foundry-python-client/pull/49>`__
 -  Updates for Raster Vision integration
    `#44 <https://github.com/raster-foundry/raster-foundry-python-client/pull/44>`__
+
+.. _section-2:
 
 `0.5.0 <https://github.com/raster-foundry/raster-foundry-python-client/tree/0.5.0>`__ (2018-01-26)
 --------------------------------------------------------------------------------------------------
@@ -32,16 +49,18 @@ Changelog <https://github.com/raster-foundry/raster-foundry-python-client/compar
    `#38 <https://github.com/raster-foundry/raster-foundry-python-client/pull/38>`__
 -  Add method to evaluate a raster-vision model
    `#36 <https://github.com/raster-foundry/raster-foundry-python-client/pull/36>`__
--  Add options to start\_prep\_train\_data
+-  Add options to start_prep_train_data
    `#34 <https://github.com/raster-foundry/raster-foundry-python-client/pull/34>`__
 -  Add Planet Upload Support
    `#33 <https://github.com/raster-foundry/raster-foundry-python-client/pull/33>`__
--  Add method to start prep\_train\_data job
+-  Add method to start prep_train_data job
    `#32 <https://github.com/raster-foundry/raster-foundry-python-client/pull/32>`__
 -  Start raster-vision predict job
    `#30 <https://github.com/raster-foundry/raster-foundry-python-client/pull/30>`__
 -  Include missing install command in README
    `#28 <https://github.com/raster-foundry/raster-foundry-python-client/pull/28>`__
+
+.. _section-3:
 
 `0.4.1 <https://github.com/raster-foundry/raster-foundry-python-client/tree/0.4.1>`__ (2017-09-27)
 --------------------------------------------------------------------------------------------------
@@ -56,6 +75,8 @@ Changelog <https://github.com/raster-foundry/raster-foundry-python-client/compar
 -  Fix ipyleaflet install
    `#25 <https://github.com/raster-foundry/raster-foundry-python-client/pull/25>`__
 
+.. _section-4:
+
 `0.4.0 <https://github.com/raster-foundry/raster-foundry-python-client/tree/0.4.0>`__ (2017-09-07)
 --------------------------------------------------------------------------------------------------
 
@@ -64,11 +85,12 @@ Changelog <https://github.com/raster-foundry/raster-foundry-python-client/compar
 
 **Merged pull requests:**
 
--  Add \*args and \*\*kwargs to no\_op function in notebook support
-   check
+-  Add \*args and \**kwargs to no_op function in notebook support check
    `#24 <https://github.com/raster-foundry/raster-foundry-python-client/pull/24>`__
 -  Include Uploads example notebook
    `#23 <https://github.com/raster-foundry/raster-foundry-python-client/pull/23>`__
+
+.. _section-5:
 
 `0.3.0 <https://github.com/raster-foundry/raster-foundry-python-client/tree/0.3.0>`__ (2017-08-15)
 --------------------------------------------------------------------------------------------------
@@ -81,6 +103,8 @@ Changelog <https://github.com/raster-foundry/raster-foundry-python-client/compar
 -  Bump cryptography version to 2.x
    `#22 <https://github.com/raster-foundry/raster-foundry-python-client/pull/22>`__
 
+.. _section-6:
+
 `0.2.1 <https://github.com/raster-foundry/raster-foundry-python-client/tree/0.2.1>`__ (2017-08-10)
 --------------------------------------------------------------------------------------------------
 
@@ -91,6 +115,8 @@ Changelog <https://github.com/raster-foundry/raster-foundry-python-client/compar
 
 -  Correct repo references
    `#21 <https://github.com/raster-foundry/raster-foundry-python-client/pull/21>`__
+
+.. _section-7:
 
 `0.2.0 <https://github.com/raster-foundry/raster-foundry-python-client/tree/0.2.0>`__ (2017-08-10)
 --------------------------------------------------------------------------------------------------
@@ -117,6 +143,8 @@ Changelog <https://github.com/raster-foundry/raster-foundry-python-client/compar
 -  Add leaflet support to project model
    `#2 <https://github.com/raster-foundry/raster-foundry-python-client/pull/2>`__
 
+.. _section-8:
+
 `0.1.0 <https://github.com/raster-foundry/raster-foundry-python-client/tree/0.1.0>`__ (2017-05-04)
 --------------------------------------------------------------------------------------------------
 
@@ -128,5 +156,5 @@ Changelog <https://github.com/raster-foundry/raster-foundry-python-client/compar
 -  Port Python client from main repository
    `#1 <https://github.com/raster-foundry/raster-foundry-python-client/pull/1>`__
 
--  *This Change Log was automatically generated by
-   `github\_changelog\_generator <https://github.com/skywinder/Github-Changelog-Generator>`__*
+-  *This Change Log was automatically generated
+   by*\ `github_changelog_generator <https://github.com/skywinder/Github-Changelog-Generator>`__
