@@ -1,11 +1,11 @@
 Change Log
 ==========
 
-`X.Y.Z <https://github.com/raster-foundry/raster-foundry-python-client/tree/X.Y.Z>`__ (2018-09-27)
+`0.7.0 <https://github.com/raster-foundry/raster-foundry-python-client/tree/0.7.0>`__ (2018-09-27)
 --------------------------------------------------------------------------------------------------
 
 `Full
-Changelog <https://github.com/raster-foundry/raster-foundry-python-client/compare/0.6.0...X.Y.Z>`__
+Changelog <https://github.com/raster-foundry/raster-foundry-python-client/compare/0.6.0...0.7.0>`__
 
 **Merged pull requests:**
 
