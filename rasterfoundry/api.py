@@ -10,7 +10,7 @@ from simplejson import JSONDecodeError
 
 from .aws.s3 import str_to_file
 from .exceptions import RefreshTokenException
-from .models import Analysis, MapToken, Project, Export
+from .models import Analysis, MapToken, Project, Export, Datasource
 from .settings import RV_TEMP_URI
 
 try:
@@ -18,10 +18,9 @@ try:
 except ImportError:
     from urlparse import urlparse
 
-
 SPEC_PATH = os.getenv(
     'RF_API_SPEC_PATH',
-    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/master/spec.yml'
+    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/1.12.0/spec/spec.yml'  # NOQA
 )
 
 
@@ -167,8 +166,15 @@ class API(object):
                 exports.append(Export(export, self))
         return exports
 
-    def get_datasources(self, **kwargs):
-        return self.client.Datasources.get_datasources(**kwargs).result()
+    def get_datasources(self):
+        datasources = []
+        for datasource in self.client.Datasources.get_datasources().result().results:
+            datasources.append(Datasource(datasource, self))
+        return datasources
+
+    def get_datasource_by_id(self, datasource_id):
+        return self.client.Datasources.get_datasources_datasourceID(
+            datasourceID=datasource_id).result()
 
     def get_scenes(self, **kwargs):
         bbox = kwargs.get('bbox')
@@ -197,7 +203,7 @@ class API(object):
         project_configs = []
         for project_ind, project_id in enumerate(project_ids):
             proj = Project(
-                self.client.Imagery.get_projects_uuid(uuid=project_id).result(),
+                self.client.Imagery.get_projects_projectID(projectID=project_id).result(),
                 self)
 
             if annotations_uris is None:
