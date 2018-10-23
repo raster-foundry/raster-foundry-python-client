@@ -10,10 +10,6 @@ Added
 Changed
 ~~~~~~~
 
--  Switched to `keepachangelog <https://keepachangelog.com/en/1.0.0/>`__
-   CHANGELOG format
-   `#69 <https://github.com/raster-foundry/raster-foundry-api-spec/pull/69>`__
-
 Deprecated
 ~~~~~~~~~~
 
@@ -25,6 +21,18 @@ Fixed
 
 Security
 ~~~~~~~~
+
+
+`1.13.0 <https://github.com/raster-foundry/raster-foundry/tree/1.13.0>`__ (2018-10-23)
+--------------------------------------------------------------------------------------
+
+Changed
+~~~~~~~
+-  Sync release numbers with api spec versions
+
+-  Switched to `keepachangelog <https://keepachangelog.com/en/1.0.0/>`__
+   CHANGELOG format
+   `#69 <https://github.com/raster-foundry/raster-foundry-api-spec/pull/69>`__
 
 `0.7.0 <https://github.com/raster-foundry/raster-foundry-python-client/tree/0.7.0>`__ (2018-09-27)
 --------------------------------------------------------------------------------------------------
