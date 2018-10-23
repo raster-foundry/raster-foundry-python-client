@@ -22,6 +22,12 @@ Fixed
 Security
 ~~~~~~~~
 
+`1.13.1 <https://github.com/raster-foundry/raster-foundry/tree/1.13.1>`__ (2018-10-23)
+--------------------------------------------------------------------------------------
+
+Changed
+~~~~~~~
+-  Bump version to stay in sync with api spec
 
 `1.13.0 <https://github.com/raster-foundry/raster-foundry/tree/1.13.0>`__ (2018-10-23)
 --------------------------------------------------------------------------------------
