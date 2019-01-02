@@ -20,7 +20,7 @@ except ImportError:
 
 SPEC_PATH = os.getenv(
     'RF_API_SPEC_PATH',
-    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/1.15.0/spec/spec.yml'  # NOQA
+    'https://raw.githubusercontent.com/raster-foundry/raster-foundry-api-spec/1.16.0/spec/spec.yml'  # NOQA
 )
 
 
