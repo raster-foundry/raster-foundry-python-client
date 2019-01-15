@@ -19,6 +19,9 @@ Removed
 Fixed
 ~~~~~
 
+-  Switched auth payload body parameter to keep up with spec changes
+   `#70 <https://github.com/raster-foundry/raster-foundry-python-client/pull/70>`__
+
 Security
 ~~~~~~~~
 
