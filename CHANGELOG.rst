@@ -19,6 +19,14 @@ Removed
 Fixed
 ~~~~~
 
+`1.16.2 <https://github.com/raster-foundry/raster-foundry/tree/1.16.2>`__ (2019-01-18)
+--------------------------------------------------------------------------------------
+
+Fixed
+~~~~~
+
+-  Bumped version in setup.py to fix bad deploy to pypi
+
 `1.16.1 <https://github.com/raster-foundry/raster-foundry/tree/1.16.1>`__ (2019-01-18)
 --------------------------------------------------------------------------------------
 
